@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#003087">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Comisiones Movistar">
+<title>Calculadora de Comisiones – Movistar</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  body{font-family:'Segoe UI',system-ui,sans-serif;background:#F4F6FA;color:#0A1628;min-height:100vh;padding-bottom:24px}
+  :root{
+    --azul:#003087;--azulM:#0066CC;--azulC:#E8F0FB;
+    --verde:#00B259;--blanco:#FFFFFF;--grisC:#F4F6FA;
+    --grisM:#D0D8E8;--grisT:#5A6A8A;--rojo:#D32F2F;--rojoC:#FFEBEE;
+  }
+  /* Layout */
+  .wrap{max-width:540px;margin:0 auto;padding:12px}
+  /* Header */
+  .header{background:linear-gradient(135deg,var(--azul),var(--azulM));border-radius:14px;padding:14px 16px;margin-bottom:12px;display:flex;align-items:center;gap:12px}
+  .logo{width:40px;height:40px;border-radius:10px;background:var(--verde);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:22px;color:#fff;flex-shrink:0}
+  .header-txt p{margin:0}
+  .header-sub{font-size:9px;color:#aac4f0;letter-spacing:.12em;text-transform:uppercase}
+  .header-title{font-size:17px;font-weight:800;color:#fff}
+  /* Card */
+  .card{background:#fff;border-radius:12px;border:1px solid var(--grisM);padding:14px;box-shadow:0 1px 4px #0000001a;margin-bottom:12px}
+  /* Labels e inputs */
+  label.lbl{display:block;font-size:10px;color:var(--grisT);margin-bottom:4px;text-transform:uppercase;letter-spacing:.07em;font-weight:700}
+  input[type=number],select{width:100%;background:#fff;border:1.5px solid var(--grisM);border-radius:8px;padding:9px 12px;color:#0A1628;font-size:13px;outline:none;appearance:none;-webkit-appearance:none}
+  input[type=range]{width:100%;accent-color:var(--verde)}
+  .hint{font-size:10px;color:var(--grisT);margin-top:3px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+  .field{margin-bottom:0}
+  /* Chips / botones */
+  .chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+  .chip{padding:7px 13px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;border:1.5px solid var(--grisM);background:#fff;color:var(--grisT);transition:all .15s;user-select:none}
+  .chip.azul-on{background:var(--azulM);border-color:var(--azulM);color:#fff}
+  .chip.verde-on{background:var(--verde);border-color:var(--verde);color:#fff}
+  /* Tabs nav */
+  .tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+  .tab{padding:8px 13px;border-radius:9px;font-size:11px;font-weight:700;cursor:pointer;border:1.5px solid var(--grisM);background:#fff;color:var(--grisT);transition:all .15s}
+  .tab.on{background:var(--azulM);border-color:var(--azulM);color:#fff;box-shadow:0 2px 8px #0066cc33}
+  /* Tabla */
+  .tbl{border-radius:10px;overflow:hidden;border:1px solid var(--grisM);margin-top:4px}
+  .tbl-head{background:var(--azul);padding:8px 12px;display:grid;gap:4px}
+  .tbl-head span{font-size:9px;color:#aac4f0;font-weight:800;text-align:right}
+  .tbl-head span:first-child{text-align:left}
+  .tbl-row{padding:8px 12px;display:grid;gap:4px;align-items:center}
+  .tbl-row:nth-child(odd){background:#fff}
+  .tbl-row:nth-child(even){background:var(--grisC)}
+  .tbl-row .momento{font-size:11px;color:#0A1628}
+  .tbl-row .factor{font-size:11px;color:var(--azulM);text-align:right;font-weight:700}
+  .tbl-row .x1{font-size:11px;color:var(--grisT);text-align:right}
+  .tbl-row .xn{font-size:12px;color:var(--verde);text-align:right;font-weight:800}
+  /* Row desglose */
+  .drow{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--grisC)}
+  .drow .dl{font-size:11px;color:var(--grisT)}
+  .drow .dl.bold{color:#0A1628;font-weight:700}
+  .drow .dv{font-size:12px;color:var(--grisT)}
+  .drow .dv.bold{font-size:14px;color:var(--azulM);font-weight:800}
+  .drow .dv.red{color:var(--rojo)}
+  /* Info box */
+  .info{border-radius:10px;padding:9px 13px;font-size:11px;line-height:1.5;background:var(--azulC);border:1px solid var(--azulM);color:var(--azulM);margin-top:4px}
+  .info.err{background:var(--rojoC);border-color:var(--rojo);color:var(--rojo)}
+  /* Total box */
+  .total-box{border-radius:10px;background:linear-gradient(135deg,var(--azul),var(--azulM));padding:12px 14px;text-align:center;margin-top:8px}
+  .total-box .tsub{font-size:10px;color:#aac4f0;text-transform:uppercase;letter-spacing:.05em}
+  .total-box .tlbl{font-size:10px;color:#aac4f0;text-transform:uppercase;letter-spacing:.08em;margin-top:2px}
+  .total-box .tval{font-size:30px;font-weight:900;color:#fff}
+  .totals-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
+  .por-linea{background:#fff;border-radius:10px;border:1px solid var(--grisM);padding:12px;text-align:center}
+  .por-linea .plbl{font-size:10px;color:var(--grisT);text-transform:uppercase;letter-spacing:.07em;font-weight:700}
+  .por-linea .pval{font-size:20px;font-weight:900;color:var(--azulM)}
+  /* ISC slider area */
+  .isc-row{display:flex;align-items:center;gap:8px}
+  .isc-num{width:56px;text-align:center;padding:6px 8px!important}
+  /* Header card */
+  .card-hdr{font-size:10px;color:var(--azulM);text-transform:uppercase;letter-spacing:.08em;font-weight:800;margin-bottom:10px}
+  /* Footer */
+  footer{text-align:center;font-size:9px;color:var(--grisT);margin-top:12px;opacity:.6}
+  /* Sección oculta */
+  .hidden{display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="logo">M</div>
+    <div class="header-txt">
+      <p class="header-sub">Canal Propio · Telefónica México</p>
+      <p class="header-title">Calculadora de Comisiones</p>
+    </div>
+  </div>
+
+  <!-- CONFIG GLOBAL -->
+  <div class="card">
+    <div class="card-hdr">⚙ Configuración global</div>
+    <div class="grid2">
+      <div class="field">
+        <label class="lbl">Figura</label>
+        <select id="g-figura" onchange="render()">
+          <option>Ejecutivo</option>
+          <option>Gerente Jr</option>
+          <option>Gerente Sr</option>
+        </select>
+      </div>
+      <div class="field">
+        <label class="lbl">ISC — <span id="isc-lbl">100</span>% (×<span id="isc-f">1.00</span>)</label>
+        <div class="isc-row">
+          <input type="range" min="0" max="100" value="100" id="isc-range" oninput="syncISC(this.value)">
+          <input type="number" min="0" max="100" value="100" id="isc-num" class="isc-num" oninput="syncISC(this.value)">
+        </div>
+        <p class="hint">Reductor de satisfacción al cliente</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab on" onclick="setTab('pospago',this)">📱 Pospago</button>
+    <button class="tab" onclick="setTab('prepago',this)">💳 Prepago</button>
+    <button class="tab" onclick="setTab('terminal',this)">📦 Term./Renov.</button>
+    <button class="tab" onclick="setTab('ecommerce',this)">🛒 Pos Ecommerce</button>
+  </div>
+
+  <!-- ═══ POSPAGO ═══ -->
+  <div id="tab-pospago" class="card">
+    <div class="field">
+      <label class="lbl">Tipo de entrada</label>
+      <div class="chips" id="tipos-chips"></div>
+    </div>
+
+    <div class="grid2" style="margin-top:10px">
+      <div class="field">
+        <label class="lbl" id="plan-lbl">Plan Contrata</label>
+        <select id="p-plan" onchange="calcPospago()"></select>
+      </div>
+      <div class="field">
+        <label class="lbl">Número de líneas</label>
+        <input type="number" id="p-lineas" value="1" min="1" oninput="calcPospago()">
+        <p class="hint" id="p-lineas-hint">1 línea</p>
+      </div>
+    </div>
+
+    <div class="grid2" style="margin-top:10px">
+      <div class="field">
+        <label class="lbl">Figura</label>
+        <select id="p-figura" onchange="calcPospago()">
+          <option>Ejecutivo</option>
+          <option>Gerente Jr</option>
+          <option>Gerente Sr</option>
+        </select>
+      </div>
+      <div class="field">
+        <label class="lbl">Cuota pospago ≥ 85%</label>
+        <div class="chips">
+          <button class="chip verde-on" id="cuota-si" onclick="setCuota(true)">Sí</button>
+          <button class="chip" id="cuota-no" onclick="setCuota(false)">No</button>
+        </div>
+        <label class="lbl" style="margin-top:8px">Mix portabilidad ≥ 25%</label>
+        <div class="chips">
+          <button class="chip verde-on" id="mix-si" onclick="setMix(true)">Sí</button>
+          <button class="chip" id="mix-no" onclick="setMix(false)">No</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="p-barrera-err" class="info err hidden" style="margin-top:8px">
+      ✗ No cumple barrera de entrada. Sin derecho a comisión pospago.
+    </div>
+
+    <div id="p-resultado">
+      <!-- Desglose -->
+      <div class="card" style="margin-top:10px;margin-bottom:0">
+        <div class="card-hdr">📋 Desglose de precio</div>
+        <div class="drow"><span class="dl">Precio de lista (con IVA)</span><span class="dv" id="p-lista">$0.00</span></div>
+        <div class="drow" id="p-desc-row" style="display:none"><span class="dl">Descuento adición 15%</span><span class="dv red" id="p-desc">−$0.00</span></div>
+        <div class="drow"><span class="dl">Precio tras descuento</span><span class="dv" id="p-tras">$0.00</span></div>
+        <div class="drow"><span class="dl">Menos IVA (16%)</span><span class="dv red" id="p-iva">−$0.00</span></div>
+        <div class="drow"><span class="dl bold">Base comisionable</span><span class="dv bold" id="p-base">$0.00</span></div>
+      </div>
+      <!-- Tabla cascada -->
+      <div class="tbl" style="margin-top:10px">
+        <div class="tbl-head" id="p-tbl-head" style="grid-template-columns:1fr 55px 85px 90px">
+          <span>MOMENTO</span><span>FACTOR</span><span>/ LÍNEA</span><span id="p-xn-hdr">× 1 LÍN.</span>
+        </div>
+        <div id="p-tbl-body"></div>
+      </div>
+      <!-- Totales -->
+      <div class="totals-grid">
+        <div class="por-linea">
+          <div class="plbl" id="p-figura-lbl">Por línea · Ejecutivo</div>
+          <div class="pval" id="p-total-linea">$0.00</div>
+        </div>
+        <div class="total-box">
+          <div class="tsub" id="p-isc-lbl">ISC 100%</div>
+          <div class="tlbl" id="p-total-lbl">TOTAL 1 LÍNEA</div>
+          <div class="tval" id="p-total-global">$0.00</div>
+        </div>
+      </div>
+      <div id="p-mig-info" class="info hidden" style="margin-top:8px">
+        ℹ No cuenta para mix de portabilidad · Pago condicionado a facturas pagadas en N1, N2 y N3
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ PREPAGO ═══ -->
+  <div id="tab-prepago" class="card hidden">
+    <div class="grid3">
+      <div class="field">
+        <label class="lbl">Recarga acumulada (con IVA)</label>
+        <input type="number" id="pr-recarga" placeholder="Ej. 200" oninput="calcPrepago()">
+        <p class="hint" id="pr-hint"></p>
+      </div>
+      <div class="field">
+        <label class="lbl">Tipo de entrada</label>
+        <select id="pr-tipo" onchange="calcPrepago()">
+          <option>Nuevo</option>
+          <option>Portabilidad</option>
+          <option>Telemarketing</option>
+        </select>
+      </div>
+      <div class="field">
+        <label class="lbl">Número de líneas</label>
+        <input type="number" id="pr-lineas" value="1" min="1" oninput="calcPrepago()">
+      </div>
+    </div>
+    <div class="info" style="margin-top:10px">✓ Sin barrera de entrada. Pago desde la primera venta, solo en mes de alta.</div>
+    <div id="pr-resultado" class="hidden" style="margin-top:8px">
+      <div class="card" style="margin-bottom:0">
+        <div class="drow"><span class="dl">Recarga sin IVA</span><span class="dv" id="pr-base">$0.00</span></div>
+        <div class="drow"><span class="dl">Factor</span><span class="dv" id="pr-factor">0%</span></div>
+        <div class="drow"><span class="dl bold">Comisión por línea</span><span class="dv bold" id="pr-por-linea">$0.00</span></div>
+      </div>
+      <div class="total-box">
+        <div class="tlbl" id="pr-total-lbl">TOTAL 1 LÍNEA</div>
+        <div class="tval" id="pr-total">$0.00</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ TERMINALES / RENOVACIONES ═══ -->
+  <div id="tab-terminal" class="card hidden">
+    <div class="field">
+      <label class="lbl">Tipo</label>
+      <div class="chips">
+        <button class="chip azul-on" id="sub-terminal" onclick="setSubTab('terminal')">📦 Terminal</button>
+        <button class="chip" id="sub-renovacion" onclick="setSubTab('renovacion')">🔄 Renovación</button>
+      </div>
+    </div>
+    <div class="grid3" style="margin-top:10px">
+      <div class="field">
+        <label class="lbl">PVP terminal (con IVA)</label>
+        <input type="number" id="t-pvp" placeholder="Ej. 8999" oninput="calcTerminal()">
+        <p class="hint" id="t-hint"></p>
+      </div>
+      <div class="field">
+        <label class="lbl">Plazo de venta</label>
+        <select id="t-plazo" onchange="calcTerminal()">
+          <option>0M</option><option>12M</option><option>18M</option><option>24M</option>
+        </select>
+      </div>
+      <div class="field">
+        <label class="lbl" id="t-lineas-lbl">N° de terminales</label>
+        <input type="number" id="t-lineas" value="1" min="1" oninput="calcTerminal()">
+      </div>
+    </div>
+    <div id="t-info" class="info" style="margin-top:8px">✓ Sin barrera de entrada · Se paga todo el sell out</div>
+    <div id="t-resultado" class="hidden" style="margin-top:8px">
+      <div class="card" style="margin-bottom:0">
+        <div class="drow"><span class="dl">PVP sin IVA</span><span class="dv" id="t-base">$0.00</span></div>
+        <div class="drow"><span class="dl">Factor plazo</span><span class="dv" id="t-factor">0%</span></div>
+        <div class="drow" id="t-tope-row" style="display:none"><span class="dl">⚠ Tope $1,100 aplicado</span><span class="dv red">$1,100.00</span></div>
+        <div class="drow"><span class="dl bold" id="t-com-lbl">Comisión por terminal</span><span class="dv bold" id="t-por-linea">$0.00</span></div>
+      </div>
+      <div class="total-box">
+        <div class="tlbl" id="t-total-lbl">TOTAL</div>
+        <div class="tval" id="t-total">$0.00</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ POS ECOMMERCE ═══ -->
+  <div id="tab-ecommerce" class="card hidden">
+    <div class="field">
+      <label class="lbl">Número de líneas</label>
+      <input type="number" id="e-lineas" value="1" min="1" oninput="calcEcommerce()">
+    </div>
+    <div class="info" style="margin-top:10px" id="e-info">✓ Unitario: $50.00 por línea · Sujeto a barrera pospago · Pago en cálculo mes 2</div>
+    <div class="card" style="margin-top:10px;margin-bottom:0">
+      <div class="drow"><span class="dl">Unitario por línea</span><span class="dv" id="e-unit">$50.00</span></div>
+      <div class="drow"><span class="dl">Número de líneas</span><span class="dv" id="e-n">1</span></div>
+      <div class="drow"><span class="dl bold">Total comisión</span><span class="dv bold" id="e-total-row">$50.00</span></div>
+    </div>
+    <div class="total-box" style="margin-top:8px">
+      <div class="tlbl" id="e-total-lbl">COMISIÓN POS ECOMMERCE</div>
+      <div class="tval" id="e-total">$50.00</div>
+    </div>
+  </div>
+
+  <footer>Uso exclusivo interno · Tlaxcala Inn CAC · IVA = precio × 0.84</footer>
+</div>
+
+<script>
+// ─── DATOS ──────────────────────────────────────────────────────────────────────
+const PLANES_NUEVA = [
+  {nombre:"Plan Pro Ilimitado – GB Ilimitados", precio:579},
+  {nombre:"Plan Pro 35 – 70GB",                precio:429},
+  {nombre:"Plan Pro 25 – 50GB",                precio:329},
+  {nombre:"Plan Pro 18 – 36GB",                precio:279},
+  {nombre:"Plan Pro 14 – 28GB",                precio:239},
+];
+const PLANES_PORT = [
+  {nombre:"Plan Ilimitado",    precio:290},
+  {nombre:"Plan Pro 35–70GB",  precio:225},
+  {nombre:"Plan Pro 25–50GB",  precio:175},
+  {nombre:"Plan Pro 18–36GB",  precio:150},
+  {nombre:"Plan Pro 14–28GB",  precio:130},
+];
+const FACTORES = {
+  "Ejecutivo":   {"Alta Nueva":[.25,.30,.30,.25],"Adición":[.25,.30,.30,.25],"Portabilidad":[.35,.45,.45,.35],"Migración TMK":[.21,.25,.25,.21]},
+  "Gerente Jr":  {"Alta Nueva":[.06,.07,.07,.06],"Adición":[.06,.07,.07,.06],"Portabilidad":[.07,.08,.08,.07],"Migración TMK":[.05,.06,.06,.05]},
+  "Gerente Sr":  {"Alta Nueva":[.04,.06,.06,.04],"Adición":[.04,.06,.06,.04],"Portabilidad":[.05,.07,.07,.05],"Migración TMK":[.03,.05,.05,.03]},
+};
+const PREP = {
+  "Ejecutivo":  {Nuevo:.15,Portabilidad:.25,Telemarketing:.10},
+  "Gerente Jr": {Nuevo:.03,Portabilidad:.04,Telemarketing:.025},
+  "Gerente Sr": {Nuevo:.03,Portabilidad:.04,Telemarketing:.025},
+};
+const TERM = {
+  "Ejecutivo":  {"0M":.034,"12M":.026,"18M":.017,"24M":.0085},
+  "Gerente Jr": {"0M":.006,"12M":.004,"18M":.003,"24M":.0015},
+  "Gerente Sr": {"0M":.006,"12M":.004,"18M":.003,"24M":.0015},
+};
+const PORT_TMK = {"Ejecutivo":50,"Gerente Jr":15,"Gerente Sr":15};
+const MESES = ["N – Activación","N1 – Factura 1","N2 – Factura 2","N3 – Factura 3"];
+const TIPOS = ["Alta Nueva","Adición","Portabilidad","Migración TMK"];
+
+// ─── ESTADO ──────────────────────────────────────────────────────────────────────
+let state = {
+  tab:"pospago", tipo:"Alta Nueva", planIdx:0,
+  cuota:true, mix:true, subTab:"terminal", isc:100
+};
+
+// ─── HELPERS ─────────────────────────────────────────────────────────────────────
+const qIVA = v => parseFloat((v*0.84).toFixed(4));
+const d15  = v => parseFloat((v*0.85).toFixed(4));
+const fmt  = n => isNaN(n)?'$0.00':n.toLocaleString('es-MX',{style:'currency',currency:'MXN',minimumFractionDigits:2});
+const fmtP = n => { const v = parseFloat((n*100).toFixed(1)); return `${v % 1 === 0 ? v.toFixed(0) : v.toFixed(1)}%`; };
+const $    = id => document.getElementById(id);
+const show = (id,v=true) => $(id).classList.toggle('hidden',!v);
+
+// ─── SYNC ISC ────────────────────────────────────────────────────────────────────
+function syncISC(v){
+  v = Math.min(100,Math.max(0,parseInt(v)||0));
+  state.isc = v;
+  $('isc-range').value = v;
+  $('isc-num').value = v;
+  $('isc-lbl').textContent = v;
+  $('isc-f').textContent = (v/100).toFixed(2);
+  calcAll();
+}
+
+// ─── TABS ─────────────────────────────────────────────────────────────────────────
+function setTab(id,btn){
+  ['pospago','prepago','terminal','ecommerce'].forEach(t=>show('tab-'+t,t===id));
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('on'));
+  if(btn) btn.classList.add('on');
+  state.tab = id;
+  calcAll();
+}
+
+// ─── TIPO ENTRADA (chips pospago) ────────────────────────────────────────────────
+function buildTiposChips(){
+  const c = $('tipos-chips'); c.innerHTML='';
+  TIPOS.forEach(t=>{
+    const b = document.createElement('button');
+    b.className = 'chip' + (t===state.tipo?' azul-on':'');
+    b.textContent = t;
+    b.onclick = ()=>{ state.tipo=t; state.planIdx=0; buildTiposChips(); updatePlanSelect(); calcPospago(); };
+    c.appendChild(b);
+  });
+}
+
+function updatePlanSelect(){
+  const esPort = state.tipo==='Portabilidad';
+  const planes = esPort ? PLANES_PORT : PLANES_NUEVA;
+  const sel = $('p-plan'); sel.innerHTML='';
+  planes.forEach((p,i)=>{
+    const o = document.createElement('option');
+    o.value=i; o.textContent=`${p.nombre} — ${fmt(p.precio)}`; sel.appendChild(o);
+  });
+  sel.value = Math.min(state.planIdx, planes.length-1);
+  const lbl = state.tipo==='Portabilidad'?'Plan Cámbiate':
+              state.tipo==='Migración TMK'?'Plan Contrata – Migración TMK':
+              state.tipo==='Adición'?'Plan Contrata – Adición':'Plan Contrata';
+  $('plan-lbl').textContent = lbl;
+}
+
+// ─── BARRERAS ────────────────────────────────────────────────────────────────────
+function setCuota(v){
+  state.cuota=v;
+  $('cuota-si').className='chip'+(v?' verde-on':'');
+  $('cuota-no').className='chip'+(v?'':' verde-on');
+  calcPospago();
+}
+function setMix(v){
+  state.mix=v;
+  $('mix-si').className='chip'+(v?' verde-on':'');
+  $('mix-no').className='chip'+(v?'':' verde-on');
+  calcPospago();
+}
+
+// ─── CALC POSPAGO ─────────────────────────────────────────────────────────────────
+function calcPospago(){
+  state.planIdx = parseInt($('p-plan').value)||0;
+  const figura = $('p-figura').value;
+  const nL = Math.max(1,parseInt($('p-lineas').value)||1);
+  $('p-lineas-hint').textContent = nL+' línea'+(nL>1?'s':'');
+  $('p-xn-hdr').textContent = `× ${nL} LÍN.`;
+  $('p-figura-lbl').textContent = `Por línea · ${figura}`;
+  $('p-isc-lbl').textContent = `ISC ${state.isc}%`;
+  $('p-total-lbl').textContent = `TOTAL ${nL} LÍNEA${nL>1?'S':''}`;
+
+  const esPort = state.tipo==='Portabilidad';
+  const esAdic = state.tipo==='Adición';
+  const esMig  = state.tipo==='Migración TMK';
+  const planes = esPort ? PLANES_PORT : PLANES_NUEVA;
+  const plan = planes[Math.min(state.planIdx,planes.length-1)];
+  const base = plan.precio;
+  const desc = esAdic ? d15(base) : base;
+  const sinIVA = qIVA(desc);
+  const iscF = state.isc/100;
+  const factores = FACTORES[figura][state.tipo];
+  const pagos = factores.map(f=>sinIVA*f*iscF);
+  const totalL = pagos.reduce((a,b)=>a+b,0);
+
+  $('p-lista').textContent = fmt(base);
+  $('p-desc-row').style.display = esAdic?'':'none';
+  $('p-desc').textContent = `−${fmt(base*0.15)}`;
+  $('p-tras').textContent = fmt(desc);
+  $('p-iva').textContent = `−${fmt(desc*0.16)}`;
+  $('p-base').textContent = fmt(sinIVA);
+
+  // Tabla
+  const body = $('p-tbl-body'); body.innerHTML='';
+  MESES.forEach((m,i)=>{
+    const row = document.createElement('div');
+    row.className='tbl-row';
+    row.style.gridTemplateColumns='1fr 55px 85px 90px';
+    row.innerHTML=`<span class="momento">${m}</span><span class="factor">${fmtP(factores[i])}</span><span class="x1">${fmt(pagos[i])}</span><span class="xn">${fmt(pagos[i]*nL)}</span>`;
+    body.appendChild(row);
+  });
+
+  $('p-total-linea').textContent = fmt(totalL);
+  $('p-total-global').textContent = fmt(totalL*nL);
+  show('p-mig-info', esMig && state.cuota && state.mix);
+
+  const sinBarrera = !state.cuota || !state.mix;
+  show('p-barrera-err', sinBarrera);
+  show('p-resultado', !sinBarrera);
+}
+
+// ─── CALC PREPAGO ─────────────────────────────────────────────────────────────────
+function calcPrepago(){
+  const figura = $('g-figura').value;
+  const recarga = parseFloat($('pr-recarga').value)||0;
+  const tipo = $('pr-tipo').value;
+  const nL = Math.max(1,parseInt($('pr-lineas').value)||1);
+  const base = qIVA(recarga);
+  const factor = PREP[figura][tipo];
+  const porLinea = base*factor*(state.isc/100);
+  $('pr-hint').textContent = recarga?`Sin IVA: ${fmt(base)}`:'';
+  $('pr-base').textContent = fmt(base);
+  $('pr-factor').textContent = fmtP(factor);
+  $('pr-por-linea').textContent = fmt(porLinea);
+  $('pr-total-lbl').textContent = `TOTAL ${nL} LÍNEA${nL>1?'S':''}`;
+  $('pr-total').textContent = fmt(porLinea*nL);
+  show('pr-resultado', !!recarga);
+}
+
+// ─── SUBTAB TERMINAL ──────────────────────────────────────────────────────────────
+function setSubTab(v){
+  state.subTab=v;
+  $('sub-terminal').className='chip'+(v==='terminal'?' azul-on':'');
+  $('sub-renovacion').className='chip'+(v==='renovacion'?' azul-on':'');
+  $('t-lineas-lbl').textContent = v==='terminal'?'N° de terminales':'N° de renovaciones';
+  $('t-com-lbl').textContent = v==='terminal'?'Comisión por terminal':'Comisión por renovación';
+  $('t-info').textContent = v==='renovacion'?
+    '✓ Solo con biométricos · Sin TT de Call Center · Se excluyen anticipadas a 12 y 18 meses':
+    '✓ Sin barrera de entrada · Se paga todo el sell out';
+  calcTerminal();
+}
+
+// ─── CALC TERMINAL ────────────────────────────────────────────────────────────────
+function calcTerminal(){
+  const figura = $('g-figura').value;
+  const pvp = parseFloat($('t-pvp').value)||0;
+  const plazo = $('t-plazo').value;
+  const nL = Math.max(1,parseInt($('t-lineas').value)||1);
+  const base = qIVA(pvp);
+  const factor = TERM[figura][plazo];
+  const bruto = base*factor;
+  const topado = plazo!=='0M' && bruto>1100;
+  const porLinea = (topado?1100:bruto)*(state.isc/100);
+  $('t-hint').textContent = pvp?`Sin IVA: ${fmt(base)}`:'';
+  $('t-base').textContent = fmt(base);
+  $('t-factor').textContent = fmtP(factor);
+  $('t-tope-row').style.display = topado?'':'none';
+  $('t-por-linea').textContent = fmt(porLinea);
+  $('t-total-lbl').textContent = `TOTAL ${nL} ${state.subTab==='terminal'?'TERMINAL':'RENOVACIÓN'}${nL>1?'ES':''}`;
+  $('t-total').textContent = fmt(porLinea*nL);
+  show('t-resultado', !!pvp);
+}
+
+// ─── CALC ECOMMERCE ───────────────────────────────────────────────────────────────
+function calcEcommerce(){
+  const figura = $('g-figura').value;
+  const nL = Math.max(1,parseInt($('e-lineas').value)||1);
+  const unit = PORT_TMK[figura];
+  const total = unit*nL*(state.isc/100);
+  $('e-info').textContent = `✓ Unitario: ${fmt(unit)} por línea · Sujeto a barrera pospago · Pago en cálculo mes 2`;
+  $('e-unit').textContent = fmt(unit);
+  $('e-n').textContent = nL;
+  $('e-total-row').textContent = fmt(total);
+  $('e-total-lbl').textContent = `${nL} LÍNEA${nL>1?'S':''} · ISC ${state.isc}%`;
+  $('e-total').textContent = fmt(total);
+}
+
+function calcAll(){
+  calcPospago(); calcPrepago(); calcTerminal(); calcEcommerce();
+}
+
+function render(){ calcAll(); }
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────────
+buildTiposChips();
+updatePlanSelect();
+calcAll();
+</script>
+
+<!-- PWA Manifest inline -->
+<script>
+const manifest = {
+  name:"Calculadora de Comisiones Movistar",
+  short_name:"Comisiones M",
+  description:"Calculadora de comisiones para Canal Propio Telefónica México",
+  start_url:"./",
+  display:"standalone",
+  background_color:"#F4F6FA",
+  theme_color:"#003087",
+  orientation:"portrait",
+  icons:[
+    {src:"data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='32' fill='%23003087'/><text x='96' y='135' font-size='110' text-anchor='middle' fill='%2300B259' font-family='Arial' font-weight='900'>M</text></svg>",sizes:"192x192",type:"image/svg+xml"},
+    {src:"data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='80' fill='%23003087'/><text x='256' y='360' font-size='300' text-anchor='middle' fill='%2300B259' font-family='Arial' font-weight='900'>M</text></svg>",sizes:"512x512",type:"image/svg+xml"}
+  ]
+};
+const blob = new Blob([JSON.stringify(manifest)],{type:'application/json'});
+const url  = URL.createObjectURL(blob);
+const link = document.createElement('link');
+link.rel='manifest'; link.href=url;
+document.head.appendChild(link);
+</script>
+
+<!-- Service Worker para offline -->
+<script>
+if('serviceWorker' in navigator){
+  const sw = `
+    const CACHE='comisiones-v1';
+    self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(['./',location.href]))));
+    self.addEventListener('fetch',e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request))));
+  `;
+  const blob2 = new Blob([sw],{type:'application/javascript'});
+  navigator.serviceWorker.register(URL.createObjectURL(blob2)).catch(()=>{});
+}
+</script>
+</body>
+</html>
